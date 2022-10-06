@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import render
 from wishlist.models import BarangWishlist
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 from django.core import serializers
 from django.shortcuts import redirect
 from django.contrib.auth.forms import UserCreationForm
@@ -72,3 +72,23 @@ def logout_user(request):
     response = HttpResponseRedirect(reverse('wishlist:login'))
     response.delete_cookie('last_login')
     return response
+
+def show_wishlistajax(request):
+    data_barang_wishlist = BarangWishlist.objects.all()
+    context = {
+        'list_barang': data_barang_wishlist,
+        'nama': 'Qaniah',
+        'last_login': request.COOKIES['last_login'],
+}
+    return render(request, "wishlist_ajax.html", context)
+
+def add_barang(request: HttpRequest):
+    if request.method == "POST":
+        nama_barang = request.POST.get("nama_barang")
+        harga_barang = request.POST.get("harga_barang")
+        deskripsi = request.POST.get("deskripsi")
+        BarangWishlist.objects.create(nama_barang=nama_barang,harga_barang=harga_barang,deskripsi=deskripsi,)
+        
+        return HttpResponse()
+    else:
+        return redirect("wihlist:show_wishlist")
